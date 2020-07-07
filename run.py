@@ -1,4 +1,4 @@
 from Manager import *
 
-network_manager = Manager()
-network_manager.run(6, 3, 10)
+network_manager = Manager(6, 3, 10)
+network_manager.run()
