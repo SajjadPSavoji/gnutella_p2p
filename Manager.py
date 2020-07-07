@@ -24,15 +24,15 @@ class Manager():
                     self.num_neighbour, self.list_actives[i],i))
 
     
-    def self.set_activations(self):
+    def set_activations(self):
         past = time.time()
         last = -1
         this = -1
         
         while True:
-            if time.time() - past >= max_time:
+            if time.time() - past >= self.max_time:
                 past = time.time()
-                x = random.ranint(0, 5)
+                x = random.ranint(0, self.num_neighbour - 1)
                 list_actives[x] = False
                 list_actives[last] = True
 
