@@ -7,14 +7,21 @@ class Manager():
         list_nodes = []
         list_actives = [[True] for i in range(num_nodes)]
         max_time = max_time
+        ip = ''
+        node_port = 8000
+        self.addresses = [(ip, node_port+i) for i in range(num_nodes)]
 
 
-    def portal(self, ..........):
-        list_nodes.append(Node('''dsafsdasdasdsadsa'''))
+    def portal(self, addr, num_neighbour, activity, id):
+        try:
+            list_nodes.append(Node(addr, num_neighbour, activity, id))
+        except(c):
+            pass
 
     def create_node(self):
         for i in range(num_nodes):
-            start_new_thread(self.portal, (..........))
+            start_new_thread(self.portal, (self.addresses, 
+                    self.num_neighbour, self.list_actives[i],i))
 
     
     def self.set_activations(self):
