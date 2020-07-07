@@ -24,6 +24,8 @@ class Node():
 
         self.make_udp_sock()
         self.init_neighbors()
+        self.run()
+
 
     def init_neighbors(self):
         for address in self.addresses:
@@ -35,7 +37,8 @@ class Node():
             if not(self.active and self.num_neighbors < self.N):
                 continue
             (message, address) = self.socket.recvfrom(self.buffsize)
-            # decode message and other stuff
+            hello = json.loads(message.decode())
+
 
     def maintain_neighbors(self):
         while(True):
@@ -44,7 +47,7 @@ class Node():
 
     def get_neighbor_by_address(self, address):
         for neighbor in self.neighbors:
-            if neighbor.__dict__['address'] == address:
+            if neighbor['address'] == address:
                 return neighbor
 
     def send_HELLO(self, address):
@@ -56,6 +59,7 @@ class Node():
         while(True):
             if not(self.active and self.num_neighbors < self.N):
                 continue
+            print('in find neighbors')
             new_address = self.get_random_neighbor()
             #send HELLO packat to address
             self.send_HELLO(new_address)
@@ -76,7 +80,7 @@ class Node():
 
     def is_address_in_neighbors(self, address):
         for neighbor in self.neighbors:
-            if neighbor.__dict__['address'] == address and neighbor.__dict__['truthful']:
+            if neighbor['address'] == address and neighbor['truthful']:
                 return True
         return False
 
@@ -88,11 +92,14 @@ class Node():
     def run(self):
         # creat 2 thread
         # find neighbor
-        start_new_thread(self.find_neighbors)
+        start_new_thread(self.find_neighbors, ())
+        print('after run ')
+
         # recv from others
-        start_new_thread(self.rcv)
+        start_new_thread(self.rcv, ())
         # neighbor maintanacne
-        start_new_thread(self.maintain_neighbors)
+        start_new_thread(self.maintain_neighbors, ())
+
 
 if __name__ == "__main__":
     pass
