@@ -9,7 +9,7 @@ class Neighbor():
         self.__dict__[last_recv_from_time] = last_recv_from_time
 
     def __repr__(self):
-        return json.dups(self.__dict__).encode()
+        return json.dumps(self.__dict__).encode()
 
 
 
