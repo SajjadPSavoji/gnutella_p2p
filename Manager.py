@@ -2,14 +2,14 @@ from utils import *
 from Node import *
 
 class Manager():
-    def __init__(self, num_nodes, num_neighbour, max_time):
+    def __init__(self, num_nodes, num_neighbour, max_time, base_port):
         self.num_nodes = num_nodes
         self.num_neighbour = num_neighbour
         self.list_nodes = []
         self.list_actives = [[True] for i in range(num_nodes)]
         self.max_time = max_time
         self.ip = ''
-        self.node_port = 8000
+        self.node_port = base_port
         self.addresses = [(self.ip, self.node_port+i) for i in range(self.num_nodes)]
 
 
@@ -27,6 +27,7 @@ class Manager():
     
     def set_activations(self):
         past = time.time()
+        start = past
         last = -1
         this = -1
         
@@ -39,6 +40,9 @@ class Manager():
 
                 last = this
                 this = x
+
+            if time.time() - start > 60 * 5:
+                exit()
 
     
     def run(self):
