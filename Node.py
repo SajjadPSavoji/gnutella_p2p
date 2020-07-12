@@ -54,7 +54,7 @@ class Node():
 
             (message, address) = self.socket.recvfrom(self.buffsize)
             print(message.decode())
-            # @TODO
+            # @TODOgp
             # construct Hello class
             # acwuire N LoCK
             # acwuice neighors Lock
@@ -67,9 +67,13 @@ class Node():
             time.sleep(self.expire_time)
             # @TODO
             self.NeighborsLock.acquire()
+            self.NLock.acquire()
             for neighbor in self.neighbors:
                 if time.time() - neighbor['last_rcv_from'] > self.expire_time:
+                    if neighbor['type'] == 'bi':
+                        self.num_neighbors -= 1
                     neighbor['type'] = None
+            self.NLock.release()
             self.NeighborsLock.release()
 
             self.SearchLock.acquire()
@@ -93,10 +97,13 @@ class Node():
             self.SearchLock.release()
 
             new_address = self.get_random_neighbor()
-            # @TODO
             # acqire Neighbots
+            self.NeighborsLock.acquire()
             # update temp
+            Neighbor = self.get_neighbor_by_address(new_address)
+            Neighbor['type'] = 'temp'
             # release
+            self.NeighborsLock.release()
             #send HELLO packat to address
             self.send_HELLO(new_address)
 
@@ -146,14 +153,12 @@ class Node():
         return False
     
     def run(self):
-        # creat 2 thread
         # find neighbor
         start_new_thread(self.find_neighbors, ())
-        print('after run ')
         # sending every 2 seconds
-        start_new_thread(self.periodic_send, ())
+        # start_new_thread(self.periodic_send, ())
         # # recv from others
-        # start_new_thread(self.rcv, ())
+        start_new_thread(self.rcv, ())
         # # neighbor maintanacne
         # start_new_thread(self.maintain_neighbors, ())
 
