@@ -55,8 +55,15 @@ class Node():
         while(True):
             time.sleep(self.expire_time)
             # @TODO
-            # acwire neighobrs Lock
-            # update neighbors
+            self.NeighborsLock.acquire()
+            for neighbor in self.neighbors:
+                if time.time() - neighbor['last_rcv_from'] > self.expire_time:
+                    neighbor['type'] = None
+            self.NeighborsLock.release()
+
+            self.SearchLock.acquire()
+            self.SearchFlag = False
+            self.SearchLock.release()
 
     def find_neighbors(self):
         while(True):
