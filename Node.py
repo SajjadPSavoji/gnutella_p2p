@@ -58,7 +58,7 @@ class Node():
                 continue
             (message, address) = self.socket.recvfrom(self.buffsize)
             hello = json.loads(message.decode())
-            address = hello['sender_address']
+            address = (hello['sender_address'][0], hello['sender_address'][1])
             
 
             rand = random.random()
@@ -74,6 +74,7 @@ class Node():
                 self.NeighborsLock.release()
                 continue
             # check if num neighbors < N
+            
             neighbor = self.get_neighbor_by_address(address)
             t = neighbor['type']
             if t == 'bi':
