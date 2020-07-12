@@ -3,7 +3,7 @@ from Neighbor import Neighbor
 from Hello import Hello
 
 class Node():
-    def __init__(self, addresses, N, active, id, expire_time=8, comm_time=0):
+    def __init__(self, addresses, N, id, expire_time=8, comm_time=0):
         '''
         address (ip, port)
         addresses are the initial addresses that client should hit: list of addresses
@@ -17,7 +17,7 @@ class Node():
         self.N = N
         self.expire_time = expire_time
         self.comm_time = comm_time
-        self.active = active
+        self.active = True
         self.neighbors = []
         self.num_neighbors = 0
         self.id = id
@@ -28,7 +28,6 @@ class Node():
 
         self.make_udp_sock()
         self.init_neighbors()
-        self.run()
 
 
     def init_neighbors(self):

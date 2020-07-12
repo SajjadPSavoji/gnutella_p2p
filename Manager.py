@@ -6,32 +6,32 @@ class Manager():
         self.num_nodes = num_nodes
         self.num_neighbour = num_neighbour
         self.list_nodes = []
-        self.list_actives = [[True] for i in range(num_nodes)]
         self.max_time = max_time
         self.ip = ''
         self.node_port = base_port
         self.addresses = [(self.ip, self.node_port+i) for i in range(self.num_nodes)]
 
 
-    def portal(self, addr, num_neighbour, activity, id):
+    def portal(self, addr, num_neighbour, id):
         try:
-            self.list_nodes.append(Node(addr, num_neighbour, activity, id))
+            self.list_nodes.append(Node(addr, num_neighbour, id))
+            self.list_nodes[-1].run()
         except :
             pass
 
     def create_node(self):
         for i in range(self.num_nodes):
             start_new_thread(self.portal, (self.addresses, 
-                    self.num_neighbour, self.list_actives[i],i))
+                    self.num_neighbour,i))
 
     
     def set_activations(self):
-        past = time.time()
-        start = past
-        last = -1
-        this = -1
+        # past = time.time()
+        # start = past
+        # last = -1
+        # this = -1
         
-        while True:
+        while True:pass
         #     if time.time() - past >= self.max_time:
         #         past = time.time()
         #         x = random.randint(0, self.num_neighbour - 1)
@@ -41,8 +41,8 @@ class Manager():
         #         last = this
         #         this = x
 
-            if time.time() - start > 60 * 5:
-                exit()
+            # if time.time() - start > 60 * 5:
+            #     exit()
 
     
     def run(self):
