@@ -56,15 +56,73 @@ class Node():
         while(True):
             if not self.active:
                 continue
-
             (message, address) = self.socket.recvfrom(self.buffsize)
-            print(message.decode())
-            # @TODOgp
-            # construct Hello class
+            hello = json.loads(message.decode())
+            address = hello['sender_address']
+            
+
+            rand = random.random()
+            if rand < 0.05:
+                continue
+
+            self.NLock.acquire()
             # acwuire N LoCK
+            self.NeighborsLock.acquire()
             # acwuice neighors Lock
+            if self.num_neighbors >= self.N:
+                self.NLock.release()
+                self.NeighborsLock.release()
+                continue
             # check if num neighbors < N
-            # updsate neighbors
+            neighbor = self.get_neighbor_by_address(address)
+            t = neighbor['type']
+            if t == 'bi':
+                self.rcv_bi_handler(neighbor, hello)
+            elif t == 'uni':
+                self.rcv_uni_handler(neighbor, hello)
+            elif t == 'temp':
+                self.rcv_temp_handler(neighbor, hello)
+            else:
+                self.rcv_none_handler(neighbor, hello)
+
+            self.NLock.release()
+            self.NeighborsLock.release()
+
+    def rcv_bi_handler(self, neighbor, hello):
+        self.update_rcv_from(neighbor, hello)
+        
+    def rcv_uni_handler(self, neighbor, hello):
+        self.update_rcv_from(neighbor, hello)
+        for address, _ in hello['neighbors']:
+            if self.is_address_mine(address):
+                neighbor['type'] = 'bi'
+                return
+
+    def rcv_temp_handler(self, neighbor, hello):
+        self.update_rcv_from(neighbor, hello)
+        for address, _ in hello['neighbors']:
+            if self.is_address_mine(address):
+                neighbor['type'] = 'bi'
+                self.SearchLock.acquire()
+                self.SearchFlag = False
+                self.SearchLock.release()
+                return
+        neighbor['type'] = 'uni'
+
+        
+    def rcv_none_handler(self, neighbor, hello):
+        self.update_rcv_from(neighbor, hello)
+        for address, _ in hello['neighbors']:
+            if self.is_address_mine(address):
+                neighbor['type'] = 'bi'
+                return
+        neighbor['type'] = 'uni'
+        
+
+    def update_rcv_from(self, neighbor, hello):
+        neighbor['last_rcv_from'] = time.time()
+        neighbor['neighbors'] = hello['neighbors']
+    
 
 
     def maintain_neighbors(self):
@@ -115,7 +173,7 @@ class Node():
         my_neighbors = []
         for neighbor in self.neighbors:
             if neighbor['type'] == "bi" or neighbor['type'] == "uni":
-                my_neighbors.append([neighbor['address'], neighbor['type']])
+                my_neighbors.append((neighbor['address'], neighbor['type']))
         return my_neighbors
 
         
