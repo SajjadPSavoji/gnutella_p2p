@@ -21,6 +21,10 @@ class Node():
         self.neighbors = []
         self.num_neighbors = 0
         self.id = id
+        self.NLock = threading.Lock()
+        self.NeighborsLock = threading.Lock()
+        self.SearchLock = threading.Lock()
+        self.SearchFlag = False
 
         self.make_udp_sock()
         self.init_neighbors()
@@ -30,21 +34,63 @@ class Node():
     def init_neighbors(self):
         for address in self.addresses:
             if not self.is_address_mine(address):
-                self.neighbors.append(Neighbor(address, None, None))
+                self.neighbors.append(Neighbor(address, -1, -1))
 
     def rcv(self):
         while(True):
-            if not(self.active and self.num_neighbors < self.N):
+            if not self.active:
                 continue
+
             (message, address) = self.socket.recvfrom(self.buffsize)
-            hello = json.loads(message.decode())
+            print(message.decode())
+            # @TODO
+            # construct Hello class
+            # acwuire N LoCK
+            # acwuice neighors Lock
+            # check if num neighbors < N
+            # updsate neighbors
 
 
     def maintain_neighbors(self):
         while(True):
             time.sleep(self.expire_time)
-            # find ecpired neighbors
+            # @TODO
+            # acwire neighobrs Lock
+            # update neighbors
 
+    def find_neighbors(self):
+        while(True):
+            # @TODO
+            self.NLock.acquire()
+            if not(self.active and self.num_neighbors < self.N):
+                self.NLock.release()
+                continue
+            self.NLock.release()
+
+            self.SearchLock.acquire()
+            if self.SearchFlag:
+                self.SearchLock.release()
+                continue
+            self.SearchFlag = True
+            self.SearchLock.release()
+
+            new_address = self.get_random_neighbor()
+            # @TODO
+            # acqire Neighbots
+            # update temp
+            # release
+            #send HELLO packat to address
+            self.send_HELLO(new_address)
+
+    def get_my_neighbors(self):
+        my_neighbors = []
+        for neighbor in self.neighbors:
+            if neighbor['type'] == "bi" or neighbor['type'] == "uni":
+                my_neighbors.append([neighbor['address'], neighbor['type']])
+        return my_neighbors
+
+
+        
     def get_neighbor_by_address(self, address):
         for neighbor in self.neighbors:
             if neighbor['address'] == address:
@@ -52,18 +98,9 @@ class Node():
 
     def send_HELLO(self, address):
         neighbor = self.get_neighbor_by_address(address)
-        hello = Hello(self.id, self.address, None, self.neighbors, neighbor)
+        hello = Hello(self.address, None, self.get_my_neighbors(), neighbor)
         self.socket.sendto(repr(hello), address)
 
-    def find_neighbors(self):
-        while(True):
-            if not(self.active and self.num_neighbors < self.N):
-                continue
-            print('in find neighbors')
-            new_address = self.get_random_neighbor()
-            #send HELLO packat to address
-            self.send_HELLO(new_address)
-        
     def make_udp_sock(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.address)
@@ -73,14 +110,14 @@ class Node():
         mask = copy.deepcopy(self.addresses)
         random.shuffle(mask)
         for address in mask:
-            if self.is_address_in_neighbors(address) or self.is_address_mine(address):
+            if self.is_address_bi(address) or self.is_address_mine(address):
                 continue
             return address
 
 
-    def is_address_in_neighbors(self, address):
+    def is_address_bi(self, address):
         for neighbor in self.neighbors:
-            if neighbor['address'] == address and neighbor['truthful']:
+            if neighbor['address'] == address and neighbor['type'] == 'bi':
                 return True
         return False
 
@@ -95,10 +132,10 @@ class Node():
         start_new_thread(self.find_neighbors, ())
         print('after run ')
 
-        # recv from others
-        start_new_thread(self.rcv, ())
-        # neighbor maintanacne
-        start_new_thread(self.maintain_neighbors, ())
+        # # recv from others
+        # start_new_thread(self.rcv, ())
+        # # neighbor maintanacne
+        # start_new_thread(self.maintain_neighbors, ())
 
 
 if __name__ == "__main__":

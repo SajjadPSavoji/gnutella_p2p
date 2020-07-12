@@ -1,15 +1,9 @@
 from utils import *
 
-class Hello(dict):
-    def __init__(self, sender_id, sender_address, type, sender_neighbors, rcv_neighbor):
-        super().__init__(self, id=sender_id, type=type
-        , neighbors = sender_neighbors, rcv = rcv_neighbor)
-        # self.__dict__ = {}
-        # self.__dict__['id'] = sender_id
-        # self.__dict__['address'] = sender_address
-        # self.__dict__['type'] = type
-        # self.__dict__['neighbors'] = sender_neighbors
-        # self.__dict__['rcv'] = rcv_neighbor
+class Hello(dict): 
+    def __init__(self, sender_address, type, sender_neighbors, neighbor):
+        super().__init__(self, sender_address=sender_address, type=type, neighbors = sender_neighbors,
+        last_sent_to = neighbor['last_sent_to'] , last_rcv_from = neighbor['last_recv_from'])
 
     def __repr__(self):
         return json.dumps(self).encode()
