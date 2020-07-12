@@ -39,11 +39,16 @@ class Node():
 
     def periodic_send(self):
         while(True):
-            time.sleep(self.expire_time)
+            time.sleep(self.comm_time)
+
+            self.NeighborsLock.acquire()
 
             for i in self.neighbors:
-                if i['type'] == 'bi':
+                if i['type'] == 'bi' or i['type'] == 'temp':
                     self.send_HELLO(i['address'])
+                    i['last_sent_to'] = time.time()
+
+            self.NeighborsLock.release()
 
 
 
@@ -104,8 +109,7 @@ class Node():
             Neighbor['type'] = 'temp'
             # release
             self.NeighborsLock.release()
-            #send HELLO packat to address
-            self.send_HELLO(new_address)
+
 
     def get_my_neighbors(self):
         my_neighbors = []
@@ -156,7 +160,7 @@ class Node():
         # find neighbor
         start_new_thread(self.find_neighbors, ())
         # sending every 2 seconds
-        # start_new_thread(self.periodic_send, ())
+        start_new_thread(self.periodic_send, ())
         # # recv from others
         start_new_thread(self.rcv, ())
         # # neighbor maintanacne
