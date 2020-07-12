@@ -3,7 +3,7 @@ from Neighbor import Neighbor
 from Hello import Hello
 
 class Node():
-    def __init__(self, addresses, N, active, id, expire_time=8, comm_time=2):
+    def __init__(self, addresses, N, active, id, expire_time=8, comm_time=0):
         '''
         address (ip, port)
         addresses are the initial addresses that client should hit: list of addresses
@@ -34,7 +34,7 @@ class Node():
     def init_neighbors(self):
         for address in self.addresses:
             if not self.is_address_mine(address):
-                self.neighbors.append(Neighbor(address, -1, -1))
+                self.neighbors.append(Neighbor(address, time.time(), time.time()))
 
 
     def periodic_send(self):
@@ -59,19 +59,20 @@ class Node():
             (message, address) = self.socket.recvfrom(self.buffsize)
             hello = json.loads(message.decode())
             address = (hello['sender_address'][0], hello['sender_address'][1])
+
+            print(f'RCV{self.address}: {hello}\n curr_neighbors{self.get_my_neighbors()}')
             
 
-            rand = random.random()
-            if rand < 0.05:
-                continue
+            # rand = random.random()
+            # if rand < 0.05:
+            #     continue
 
             self.NLock.acquire()
-            # acwuire N LoCK
             self.NeighborsLock.acquire()
-            # acwuice neighors Lock
+            
             if self.num_neighbors >= self.N:
-                self.NLock.release()
                 self.NeighborsLock.release()
+                self.NLock.release()
                 continue
             # check if num neighbors < N
             
@@ -86,8 +87,10 @@ class Node():
             else:
                 self.rcv_none_handler(neighbor, hello)
 
-            self.NLock.release()
+            print(f'CHANGE{self.address}:neighbors{self.get_my_neighbors()}')
+
             self.NeighborsLock.release()
+            self.NLock.release()
 
     def rcv_bi_handler(self, neighbor, hello):
         self.update_rcv_from(neighbor, hello)
@@ -121,8 +124,8 @@ class Node():
         
 
     def update_rcv_from(self, neighbor, hello):
-        neighbor['last_rcv_from'] = time.time()
-        neighbor['neighbors'] = hello['neighbors']
+        neighbor['last_recv_from'] = time.time()
+        neighbor['neighbors_list'] = hello['neighbors']
     
 
 
@@ -133,7 +136,7 @@ class Node():
             self.NeighborsLock.acquire()
             self.NLock.acquire()
             for neighbor in self.neighbors:
-                if time.time() - neighbor['last_rcv_from'] > self.expire_time:
+                if time.time() - neighbor['last_recv_from'] > self.expire_time:
                     if neighbor['type'] == 'bi':
                         self.num_neighbors -= 1
                     neighbor['type'] = None
@@ -186,6 +189,7 @@ class Node():
     def send_HELLO(self, address):
         neighbor = self.get_neighbor_by_address(address)
         hello = Hello(self.address, None, self.get_my_neighbors(), neighbor)
+        print(f'SEND{self.address} to {address}\n Hello:{repr(hello)} , curr_neighbors:{self.neighbors}',"\n")
         self.socket.sendto(repr(hello).encode(), address)
 
 
@@ -211,9 +215,10 @@ class Node():
         return False
 
     def is_address_mine(self, address):
-        if address == self.addresses:
+        if address == self.address:
             return True
         return False
+
     
     def run(self):
         # find neighbor
@@ -224,6 +229,8 @@ class Node():
         start_new_thread(self.rcv, ())
         # # neighbor maintanacne
         # start_new_thread(self.maintain_neighbors, ())
+        while(True):
+            pass
 
 
 if __name__ == "__main__":

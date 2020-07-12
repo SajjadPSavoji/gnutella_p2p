@@ -32,14 +32,14 @@ class Manager():
         this = -1
         
         while True:
-            if time.time() - past >= self.max_time:
-                past = time.time()
-                x = random.randint(0, self.num_neighbour - 1)
-                self.list_actives[x] = False
-                self.list_actives[last] = True
+        #     if time.time() - past >= self.max_time:
+        #         past = time.time()
+        #         x = random.randint(0, self.num_neighbour - 1)
+        #         self.list_actives[x] = False
+        #         self.list_actives[last] = True
 
-                last = this
-                this = x
+        #         last = this
+        #         this = x
 
             if time.time() - start > 60 * 5:
                 exit()
