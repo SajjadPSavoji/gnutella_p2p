@@ -6,7 +6,11 @@ class Hello(dict):
         last_sent_to = neighbor['last_sent_to'] , last_rcv_from = neighbor['last_recv_from'])
 
     def __repr__(self):
-        return json.dumps(self).encode()
+        return json.dumps(self)
+
+    def __str__(self):
+        return json.dumps(self)
+
 
 if __name__ == "__main__":
-    pass
+    pass    

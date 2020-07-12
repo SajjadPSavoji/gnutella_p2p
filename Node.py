@@ -89,7 +89,6 @@ class Node():
                 my_neighbors.append([neighbor['address'], neighbor['type']])
         return my_neighbors
 
-
         
     def get_neighbor_by_address(self, address):
         for neighbor in self.neighbors:
@@ -99,12 +98,14 @@ class Node():
     def send_HELLO(self, address):
         neighbor = self.get_neighbor_by_address(address)
         hello = Hello(self.address, None, self.get_my_neighbors(), neighbor)
-        self.socket.sendto(repr(hello), address)
+        self.socket.sendto(repr(hello).encode(), address)
+
 
     def make_udp_sock(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.address)
         self.buffsize = 1024
+
 
     def get_random_neighbor(self):
         mask = copy.deepcopy(self.addresses)
@@ -131,7 +132,6 @@ class Node():
         # find neighbor
         start_new_thread(self.find_neighbors, ())
         print('after run ')
-
         # # recv from others
         # start_new_thread(self.rcv, ())
         # # neighbor maintanacne
