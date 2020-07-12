@@ -45,8 +45,8 @@ class Node():
 
             for i in self.neighbors:
                 if i['type'] == 'bi' or i['type'] == 'temp':
-                    self.send_HELLO(i['address'])
                     i['last_sent_to'] = time.time()
+                    self.send_HELLO(i['address'])
 
             self.NeighborsLock.release()
 
