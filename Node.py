@@ -36,6 +36,17 @@ class Node():
             if not self.is_address_mine(address):
                 self.neighbors.append(Neighbor(address, -1, -1))
 
+
+    def periodic_send(self):
+        while(True):
+            time.sleep(self.expire_time)
+
+            for i in self.neighbors:
+                if i['type'] == 'bi':
+                    self.send_HELLO(i['address'])
+
+
+
     def rcv(self):
         while(True):
             if not self.active:
@@ -132,6 +143,8 @@ class Node():
         # find neighbor
         start_new_thread(self.find_neighbors, ())
         print('after run ')
+        # sending every 2 seconds
+        start_new_thread(self.periodic_send, ())
         # # recv from others
         # start_new_thread(self.rcv, ())
         # # neighbor maintanacne
