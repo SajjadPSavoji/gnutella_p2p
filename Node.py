@@ -43,7 +43,8 @@ class Node():
             self.NeighborsLock.acquire()
 
             for i in self.neighbors:
-                if i['type'] == 'bi' or i['type'] == 'temp':
+                # _____________________________________________________________???????
+                if i['type'] == 'bi' or i['type'] == 'temp' or i['type'] == 'uni':
                     i['last_sent_to'] = time.time()
                     self.send_HELLO(i['address'])
 
@@ -77,7 +78,6 @@ class Node():
             
             neighbor = self.get_neighbor_by_address(address)
             t = neighbor['type']
-            print(t)
             if t == 'bi':
                 self.rcv_bi_handler(neighbor, hello)
             elif t == 'uni':
@@ -99,6 +99,7 @@ class Node():
     def rcv_uni_handler(self, neighbor, hello):
         self.update_rcv_from(neighbor, hello)
         for address, _ in hello['neighbors']:
+            address = (address[0], address[1])
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
                 self.num_neighbors += 1
@@ -110,6 +111,7 @@ class Node():
     def rcv_temp_handler(self, neighbor, hello):
         self.update_rcv_from(neighbor, hello)
         for address, _ in hello['neighbors']:
+            address = (address[0], address[1])
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
                 self.num_neighbors += 1
@@ -124,6 +126,7 @@ class Node():
     def rcv_none_handler(self, neighbor, hello):
         self.update_rcv_from(neighbor, hello)
         for address, _ in hello['neighbors']:
+            address = (address[0], address[1])
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
                 self.num_neighbors += 1
@@ -255,6 +258,3 @@ class Node():
         c.join()
         # d.join()
 
-
-if __name__ == "__main__":
-    pass
