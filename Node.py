@@ -3,7 +3,7 @@ from Neighbor import Neighbor
 from Hello import Hello
 
 class Node():
-    def __init__(self, addresses, N, id, expire_time=8, comm_time=0):
+    def __init__(self, addresses, N, id, expire_time=8, comm_time=1):
         '''
         address (ip, port)
         addresses are the initial addresses that client should hit: list of addresses
@@ -59,7 +59,7 @@ class Node():
             hello = json.loads(message.decode())
             address = (hello['sender_address'][0], hello['sender_address'][1])
 
-            print(f'RCV{self.address}: {hello}\n curr_neighbors{self.get_my_neighbors()}')
+            print(f'RCV{self.address}: {hello}\n curr_neighbors{self.get_my_neighbors()}\n')
             
 
             # rand = random.random()
@@ -77,6 +77,7 @@ class Node():
             
             neighbor = self.get_neighbor_by_address(address)
             t = neighbor['type']
+            print(t)
             if t == 'bi':
                 self.rcv_bi_handler(neighbor, hello)
             elif t == 'uni':
@@ -86,7 +87,8 @@ class Node():
             else:
                 self.rcv_none_handler(neighbor, hello)
 
-            print(f'CHANGE{self.address}:neighbors{self.get_my_neighbors()}')
+
+            # print(f'CHANGE{self.address}:neighbors{self.get_my_neighbors()}')
 
             self.NeighborsLock.release()
             self.NLock.release()
@@ -99,6 +101,10 @@ class Node():
         for address, _ in hello['neighbors']:
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
+                self.num_neighbors += 1
+                self.SearchLock.acquire()
+                self.SearchFlag = False
+                self.SearchLock.release()
                 return
 
     def rcv_temp_handler(self, neighbor, hello):
@@ -106,11 +112,13 @@ class Node():
         for address, _ in hello['neighbors']:
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
+                self.num_neighbors += 1
                 self.SearchLock.acquire()
                 self.SearchFlag = False
                 self.SearchLock.release()
                 return
         neighbor['type'] = 'uni'
+
 
         
     def rcv_none_handler(self, neighbor, hello):
@@ -118,6 +126,10 @@ class Node():
         for address, _ in hello['neighbors']:
             if self.is_address_mine(address):
                 neighbor['type'] = 'bi'
+                self.num_neighbors += 1
+                self.SearchLock.acquire()
+                self.SearchFlag = False
+                self.SearchLock.release()
                 return
         neighbor['type'] = 'uni'
         
@@ -131,16 +143,16 @@ class Node():
     def maintain_neighbors(self):
         while(True):
             time.sleep(self.expire_time)
-            # @TODO
-            self.NeighborsLock.acquire()
+
             self.NLock.acquire()
+            self.NeighborsLock.acquire()
             for neighbor in self.neighbors:
                 if time.time() - neighbor['last_recv_from'] > self.expire_time:
                     if neighbor['type'] == 'bi':
                         self.num_neighbors -= 1
                     neighbor['type'] = None
-            self.NLock.release()
             self.NeighborsLock.release()
+            self.NLock.release()
 
             self.SearchLock.acquire()
             self.SearchFlag = False
@@ -148,16 +160,17 @@ class Node():
 
     def find_neighbors(self):
         while(True):
-            # @TODO
             self.NLock.acquire()
             if not(self.active and self.num_neighbors < self.N):
                 self.NLock.release()
+                time.sleep(1)
                 continue
             self.NLock.release()
 
             self.SearchLock.acquire()
             if self.SearchFlag:
                 self.SearchLock.release()
+                time.sleep(1)
                 continue
             self.SearchFlag = True
             self.SearchLock.release()
@@ -188,7 +201,8 @@ class Node():
     def send_HELLO(self, address):
         neighbor = self.get_neighbor_by_address(address)
         hello = Hello(self.address, None, self.get_my_neighbors(), neighbor)
-        print(f'SEND{self.address} to {address}\n Hello:{repr(hello)} , curr_neighbors:{self.neighbors}',"\n")
+        print(f'SEND{self.address} to {address}, curr_neighbors:{self.neighbors}')
+        print(hello['neighbors'], "++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n")
         self.socket.sendto(repr(hello).encode(), address)
 
 
@@ -221,15 +235,25 @@ class Node():
     
     def run(self):
         # find neighbor
-        start_new_thread(self.find_neighbors, ())
+        a = Thread(target=self.find_neighbors, args=())
+        a.start()
+
         # sending every 2 seconds
-        start_new_thread(self.periodic_send, ())
+        b = Thread(target=self.periodic_send, args=())
+        b.start()
+
         # # recv from others
-        start_new_thread(self.rcv, ())
+        c = Thread(target=self.rcv, args=())
+        c.start()
+
         # # neighbor maintanacne
-        # start_new_thread(self.maintain_neighbors, ())
-        while(True):
-            pass
+        # d = Thread(target=self.maintain_neighbors, args=())
+        # d.start()
+
+        a.join()
+        b.join()
+        c.join()
+        # d.join()
 
 
 if __name__ == "__main__":

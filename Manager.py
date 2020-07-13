@@ -1,6 +1,9 @@
 from utils import *
 from Node import *
 
+Minute = 60
+
+
 class Manager():
     def __init__(self, num_nodes, num_neighbour, max_time, base_port):
         self.num_nodes = num_nodes
@@ -10,28 +13,32 @@ class Manager():
         self.ip = ''
         self.node_port = base_port
         self.addresses = [(self.ip, self.node_port+i) for i in range(self.num_nodes)]
+        self.list_threads = []
 
 
     def portal(self, addr, num_neighbour, id):
         try:
-            self.list_nodes.append(Node(addr, num_neighbour, id))
-            self.list_nodes[-1].run()
+            node = Node(addr, num_neighbour, id)
+            self.list_nodes.append(node)
+            node.run()
         except :
             pass
 
     def create_node(self):
         for i in range(self.num_nodes):
-            start_new_thread(self.portal, (self.addresses, 
-                    self.num_neighbour,i))
+            new_thread = Thread(target=self.portal,
+                         args=(self.addresses, self.num_neighbour,i))
+            new_thread.start()
+            self.list_threads.append(new_thread)
 
     
     def set_activations(self):
-        # past = time.time()
-        # start = past
+        past = time.time()
+        start = past
         # last = -1
         # this = -1
         
-        while True:pass
+        while True:
         #     if time.time() - past >= self.max_time:
         #         past = time.time()
         #         x = random.randint(0, self.num_neighbour - 1)
@@ -41,8 +48,11 @@ class Manager():
         #         last = this
         #         this = x
 
-            # if time.time() - start > 60 * 5:
-            #     exit()
+            if time.time() - start > 5 * Minute:
+                break
+
+        for i in self.list_threads:
+            i.join()
 
     
     def run(self):
