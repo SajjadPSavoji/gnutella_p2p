@@ -3,7 +3,7 @@ from Neighbor import Neighbor
 from Hello import Hello
 
 class Node():
-    def __init__(self, addresses, N, id, expire_time=8, comm_time=1):
+    def __init__(self, addresses, N, id, expire_time=8, comm_time=2):
         '''
         address (ip, port)
         addresses are the initial addresses that client should hit: list of addresses
@@ -36,7 +36,7 @@ class Node():
                 self.neighbors.append(Neighbor(address, time.time(), time.time()))
 
 
-    def periodic_send(self):
+    def periodic_send(self, stop):
         while(True):
             time.sleep(self.comm_time)
 
@@ -50,9 +50,12 @@ class Node():
 
             self.NeighborsLock.release()
 
+            if stop:
+                exit()
 
 
-    def rcv(self):
+
+    def rcv(self, stop):
         while(True):
             if not self.active:
                 continue
@@ -92,6 +95,10 @@ class Node():
 
             self.NeighborsLock.release()
             self.NLock.release()
+
+
+            if stop:
+                exit()
 
     def rcv_bi_handler(self, neighbor, hello):
         self.update_rcv_from(neighbor, hello)
@@ -143,7 +150,7 @@ class Node():
     
 
 
-    def maintain_neighbors(self):
+    def maintain_neighbors(self, stop):
         while(True):
             time.sleep(self.expire_time)
 
@@ -161,7 +168,10 @@ class Node():
             self.SearchFlag = False
             self.SearchLock.release()
 
-    def find_neighbors(self):
+            if stop:
+                exit()
+
+    def find_neighbors(self, stop):
         while(True):
             self.NLock.acquire()
             if not(self.active and self.num_neighbors < self.N):
@@ -186,6 +196,10 @@ class Node():
             Neighbor['type'] = 'temp'
             # release
             self.NeighborsLock.release()
+
+
+            if stop:
+                exit()
 
 
     def get_my_neighbors(self):
@@ -236,21 +250,21 @@ class Node():
         return False
 
     
-    def run(self):
+    def run(self, stop):
         # find neighbor
-        a = Thread(target=self.find_neighbors, args=())
+        a = Thread(target=self.find_neighbors, args=(lambda : stop, ))
         a.start()
 
         # sending every 2 seconds
-        b = Thread(target=self.periodic_send, args=())
+        b = Thread(target=self.periodic_send, args=(lambda : stop, ))
         b.start()
 
         # # recv from others
-        c = Thread(target=self.rcv, args=())
+        c = Thread(target=self.rcv, args=(lambda : stop, ))
         c.start()
 
         # # neighbor maintanacne
-        # d = Thread(target=self.maintain_neighbors, args=())
+        # d = Thread(target=self.maintain_neighbors, args=(lambda : stop_threads, ))
         # d.start()
 
         a.join()

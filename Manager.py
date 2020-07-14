@@ -12,24 +12,28 @@ class Manager():
         self.max_time = max_time
         self.ip = ''
         self.node_port = base_port
-        self.addresses = [(self.ip, self.node_port+i) for i in range(self.num_nodes)]
+        self.addresses = [(self.ip, self.node_port + i) for i in range(self.num_nodes)]
         self.list_threads = []
+        self.stop_thread = False
 
 
-    def portal(self, addr, num_neighbour, id):
+    def portal(self, addr, num_neighbour, id, stop):
         try:
             node = Node(addr, num_neighbour, id)
             self.list_nodes.append(node)
-            node.run()
+            node.run(stop)
         except :
             pass
 
     def create_node(self):
         for i in range(self.num_nodes):
             new_thread = Thread(target=self.portal,
-                         args=(self.addresses, self.num_neighbour,i))
+                         args=(self.addresses, self.num_neighbour,i, lambda : self.stop_threads, ))
             new_thread.start()
+            print("Node " + str(i + 1) + " is created.")
             self.list_threads.append(new_thread)
+        
+        print(" ")
 
     
     def set_activations(self):
@@ -49,10 +53,14 @@ class Manager():
         #         this = x
 
             if time.time() - start > 5 * Minute:
+                self.stop_threads = True
                 break
-
+        
+        
         for i in self.list_threads:
             i.join()
+
+        print('All threads are joined and the program is finished.')
 
     
     def run(self):
