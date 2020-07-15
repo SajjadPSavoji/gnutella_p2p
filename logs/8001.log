@@ -1,0 +1,150 @@
+{
+  "time": 1594837681.917139,
+  "procedure": "SEARCH",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837681.93893,
+      "last_recv_from": 1594837681.9389303,
+      "type": "temp",
+      "neighbors_list": []
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "RCV",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837681.93893,
+      "last_recv_from": 1594837681.9389303,
+      "type": "temp",
+      "neighbors_list": []
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "UPDATE",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837681.93893,
+      "last_recv_from": 1594837683.9995756,
+      "type": "tempuni",
+      "neighbors_list": []
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "SEND",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837684.0464573,
+      "last_recv_from": 1594837683.9995756,
+      "type": "tempuni",
+      "neighbors_list": []
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "RCV",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837684.0464573,
+      "last_recv_from": 1594837683.9995756,
+      "type": "tempuni",
+      "neighbors_list": []
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "UPDATE",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837684.0464573,
+      "last_recv_from": 1594837686.0225136,
+      "type": "bi",
+      "neighbors_list": [
+        [
+          [
+            "",
+            8001
+          ],
+          "bi"
+        ]
+      ]
+    }
+  ]
+}{
+  "time": 1594837681.917139,
+  "procedure": "SEND",
+  "address": [
+    "",
+    8000
+  ],
+  "neighbors": [
+    {
+      "address": [
+        "",
+        8000
+      ],
+      "last_sent_to": 1594837686.0886192,
+      "last_recv_from": 1594837686.0225136,
+      "type": "bi",
+      "neighbors_list": [
+        [
+          [
+            "",
+            8001
+          ],
+          "bi"
+        ]
+      ]
+    }
+  ]
+}

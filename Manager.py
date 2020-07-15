@@ -5,7 +5,7 @@ Minute = 60
 
 
 class Manager():
-    def __init__(self, num_nodes, num_neighbour, max_time, base_port):
+    def __init__(self, num_nodes, num_neighbour, max_time, base_port, log_path = './logs/'):
         self.num_nodes = num_nodes
         self.num_neighbour = num_neighbour
         self.list_nodes = []
@@ -14,12 +14,19 @@ class Manager():
         self.node_port = base_port
         self.addresses = [(self.ip, self.node_port + i) for i in range(self.num_nodes)]
         self.list_threads = []
-        self.stop_thread = False
+        self.stop_threads = False
+        self.log_path = log_path
+        self.init_log_dir()
 
+    def init_log_dir(self):
+        try:
+            os.mkdir(self.log_path)
+        except:
+            pass
 
     def portal(self, addr, num_neighbour, id, stop):
         try:
-            node = Node(addr, num_neighbour, id)
+            node = Node(addr, num_neighbour, id, self.log_path)
             self.list_nodes.append(node)
             node.run(stop)
         except :
@@ -28,7 +35,7 @@ class Manager():
     def create_node(self):
         for i in range(self.num_nodes):
             new_thread = Thread(target=self.portal,
-                         args=(self.addresses, self.num_neighbour,i, lambda : self.stop_threads, ))
+                         args=(self.addresses, self.num_neighbour, i, self.stop_threads))
             new_thread.start()
             print("Node " + str(i + 1) + " is created.")
             self.list_threads.append(new_thread)
