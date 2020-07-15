@@ -7,3 +7,4 @@ BASEPORT = 8000
 
 network_manager = Manager(NODES, N, TIME, BASEPORT)
 network_manager.run()
+
