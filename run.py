@@ -1,6 +1,6 @@
 from Manager import *
 
-NODES = 2
+NODES = 3
 N = 1
 TIME = 10
 BASEPORT = 8000

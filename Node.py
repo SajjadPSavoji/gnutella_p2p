@@ -100,7 +100,10 @@ class Node():
                 self.rcv_none_handler(neighbor, hello)
             
             self.log(Log('UPDATE', address, self.neighbors))
-            # print("UPDATE?", self.address,"\n", self.neighbors, '\n')
+            # print("UPDATE", self.address)
+            # for i in self.neighbors:
+            #     print(i['address'], i['type'])
+            # print(" ")
 
             self.NeighborsLock.release()
             self.NLock.release()
@@ -181,9 +184,7 @@ class Node():
 
     def maintain_neighbors(self, stop):
         while(True):
-            if not self.active:
-                continue
-            time.sleep(self.expire_time)
+            time.sleep(1)
 
             self.NLock.acquire()
             self.NeighborsLock.acquire()
@@ -191,6 +192,7 @@ class Node():
                 if time.time() - neighbor['last_recv_from'] > self.expire_time:
                     if neighbor['type'] == 'bi':
                         self.num_neighbors -= 1
+                        # print(self.address, "missed -->", neighbor['address'])
                     neighbor['type'] = None
                     self.log(Log('DUMP', neighbor['address'], self.neighbors))
             self.NeighborsLock.release()
@@ -264,6 +266,7 @@ class Node():
         mask = copy.deepcopy(self.addresses)
         random.shuffle(mask)
         for address in mask:
+            neighbor = self.get_neighbor_by_address(address)
             if self.is_address_bi(address) or self.is_address_mine(address):
                 continue
             return address
@@ -290,11 +293,11 @@ class Node():
         b = Thread(target=self.periodic_send, args=(stop, ))
         b.start()
 
-        # # recv from others
+        # recv from others
         c = Thread(target=self.rcv, args=(stop, ))
         c.start()
 
-        # # neighbor maintanacne
+        # neighbor maintanacne
         d = Thread(target=self.maintain_neighbors, args=(stop, ))
         d.start()
 
