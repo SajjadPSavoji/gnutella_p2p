@@ -13,7 +13,7 @@ class Manager():
         self.ip = ''
         self.node_port = base_port
         self.addresses = [(self.ip, self.node_port + i) for i in range(self.num_nodes)]
-        self.list_threads = []
+        # self.list_threads = []
         self.stop_threads = False
         self.log_path = log_path
         self.init_log_dir()
@@ -39,7 +39,7 @@ class Manager():
                             self.stop_threads))
             new_thread.start()
             print("Node " + str(i + 1) + " is created.")
-            self.list_threads.append(new_thread)
+            # self.list_threads.append(new_thread)
         
         print(" ")
 
@@ -51,20 +51,21 @@ class Manager():
         this = -1
         
         while True:
-            # # if time.time() - past >= self.max_time:
-            # if time.time() - past >= 1:
-            #     past = time.time()
-            #     x = random.randint(0, self.num_neighbour - 1)
-            #     # self.list_threads[x].active = False
-            #     # if last != -1:
-            #     #     self.list_threads[last].active = True
+            if time.time() - past >= self.max_time:
+                x = random.randint(0, self.num_nodes - 1)
+                
+                self.list_nodes[x].active = False
+                
+                if last != -1 and x != last:
+                    self.list_nodes[last].active = True
 
-            #     # last = this
-            #     # this = x
-            #     print(self.list_threads)
-            #     print(threading.local())
-            #     print(self.list_threads[x])
-            #     print("_______")
+                past = time.time()
+                last = this
+                this = x
+                
+                for i in self.list_nodes:
+                    print(i.address,"is active -->" ,i.active)
+                print("_______")
 
             if time.time() - start > 5 * Minute:
                 self.stop_threads = True

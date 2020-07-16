@@ -53,6 +53,7 @@ class Node():
             if not self.active: continue
             self.NeighborsLock.acquire()
 
+            # print(self.address, "sending ....")
             for i in self.neighbors:
                 if i['type'] == 'bi' or i['type'] == 'temp' or i['type'] == 'tempuni':
                     i['last_sent_to'] = time.time()
@@ -99,7 +100,7 @@ class Node():
                 self.rcv_none_handler(neighbor, hello)
             
             self.log(Log('UPDATE', address, self.neighbors))
-            print("UPDATE?", self.address,"\n", self.neighbors, '\n')
+            # print("UPDATE?", self.address,"\n", self.neighbors, '\n')
 
             self.NeighborsLock.release()
             self.NLock.release()
