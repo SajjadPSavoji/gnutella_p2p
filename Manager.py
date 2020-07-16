@@ -35,7 +35,8 @@ class Manager():
     def create_node(self):
         for i in range(self.num_nodes):
             new_thread = Thread(target=self.portal,
-                         args=(self.addresses, self.num_neighbour, i, self.stop_threads))
+                         args=(self.addresses, self.num_neighbour, i, 
+                            self.stop_threads))
             new_thread.start()
             print("Node " + str(i + 1) + " is created.")
             self.list_threads.append(new_thread)
@@ -46,18 +47,24 @@ class Manager():
     def set_activations(self):
         past = time.time()
         start = past
-        # last = -1
-        # this = -1
+        last = -1
+        this = -1
         
         while True:
-        #     if time.time() - past >= self.max_time:
-        #         past = time.time()
-        #         x = random.randint(0, self.num_neighbour - 1)
-        #         self.list_actives[x] = False
-        #         self.list_actives[last] = True
+            # # if time.time() - past >= self.max_time:
+            # if time.time() - past >= 1:
+            #     past = time.time()
+            #     x = random.randint(0, self.num_neighbour - 1)
+            #     # self.list_threads[x].active = False
+            #     # if last != -1:
+            #     #     self.list_threads[last].active = True
 
-        #         last = this
-        #         this = x
+            #     # last = this
+            #     # this = x
+            #     print(self.list_threads)
+            #     print(threading.local())
+            #     print(self.list_threads[x])
+            #     print("_______")
 
             if time.time() - start > 5 * Minute:
                 self.stop_threads = True

@@ -99,6 +99,7 @@ class Node():
                 self.rcv_none_handler(neighbor, hello)
             
             self.log(Log('UPDATE', address, self.neighbors))
+            print("UPDATE?", self.address,"\n", self.neighbors, '\n')
 
             self.NeighborsLock.release()
             self.NLock.release()
@@ -179,6 +180,8 @@ class Node():
 
     def maintain_neighbors(self, stop):
         while(True):
+            if not self.active:
+                continue
             time.sleep(self.expire_time)
 
             self.NLock.acquire()
@@ -188,7 +191,7 @@ class Node():
                     if neighbor['type'] == 'bi':
                         self.num_neighbors -= 1
                     neighbor['type'] = None
-                    self.log(Log('DUMP', neighbor.address, self.neighbors))
+                    self.log(Log('DUMP', neighbor['address'], self.neighbors))
             self.NeighborsLock.release()
             self.NLock.release()
 
