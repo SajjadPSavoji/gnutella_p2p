@@ -3,7 +3,7 @@
   "procedure": "SEARCH",
   "address": [
     "",
-    8000
+    8001
   ],
   "neighbors": [
     {
@@ -11,19 +11,19 @@
         "",
         8000
       ],
-      "last_sent_to": 1594993722.2050068,
-      "last_recv_from": 1594993722.205007,
-      "type": "temp",
+      "last_sent_to": 1594993722.204943,
+      "last_recv_from": 1594993722.2049432,
+      "type": null,
       "neighbors_list": []
     },
     {
       "address": [
         "",
-        8002
+        8001
       ],
-      "last_sent_to": 1594993722.2050135,
-      "last_recv_from": 1594993722.2050138,
-      "type": null,
+      "last_sent_to": 1594993722.2049496,
+      "last_recv_from": 1594993722.2049499,
+      "type": "temp",
       "neighbors_list": []
     }
   ]
