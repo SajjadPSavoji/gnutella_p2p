@@ -54,12 +54,13 @@ class Manager():
         while True:
             if time.time() - past >= self.max_time:
                 
-                while x != this:
+                x = -1
+                while x == this or x == last or x == -1:
                     x = random.randint(0, self.num_nodes - 1)
                 
                 self.list_nodes[x].active = False
                 
-                if last != -1 and x != last:
+                if last != -1:
                     self.list_nodes[last].active = True
 
                 past = time.time()
@@ -70,6 +71,7 @@ class Manager():
                 for i in self.list_nodes:
                     print(i.address,"is active -->" ,i.active)
                 print("_______")
+
 
             if time.time() - start > 5 * Minute:
                 self.stop_threads = True

@@ -50,7 +50,10 @@ class Node():
     def periodic_send(self, stop):
         while(True):
             time.sleep(self.comm_time)
-            if not self.active: continue
+            if not self.active: 
+                time.sleep(1)
+                continue
+            
             self.NeighborsLock.acquire()
 
             # print(self.address, "sending ....")
@@ -69,19 +72,29 @@ class Node():
 
     def rcv(self, stop):
         while(True):
-            if not self.active:
-                continue
             (message, address) = self.socket.recvfrom(self.buffsize)
             hello = json.loads(message.decode())
             address = (hello['sender_address'][0], hello['sender_address'][1])
+            
 
             self.NLock.acquire()
             self.NeighborsLock.acquire()
 
+            # if not active
+            if not self.active:
+                time.sleep(1)
+                self.NeighborsLock.release()
+                self.NLock.release()
+                continue
+
+            # if pckt loss
             rand = random.random()
             if rand < 0.05:
                 self.log(Log('PcktLoss', address, self.neighbors))
+                self.NeighborsLock.release()
+                self.NLock.release()
                 continue
+
 
             self.log(Log('RCV', address, self.neighbors))
             
@@ -100,10 +113,11 @@ class Node():
                 self.rcv_none_handler(neighbor, hello)
             
             self.log(Log('UPDATE', address, self.neighbors))
-            # print("UPDATE", self.address)
-            # for i in self.neighbors:
-            #     print(i['address'], i['type'])
-            # print(" ")
+
+            print("UPDATE", self.address)
+            for i in self.neighbors:
+                print(i['address'], i['type'])
+            print(" ")
 
             self.NeighborsLock.release()
             self.NLock.release()
@@ -188,11 +202,16 @@ class Node():
 
             self.NLock.acquire()
             self.NeighborsLock.acquire()
+
+            for neighbor in self.neighbors:
+                if neighbor['type'] == 'tempuni':
+                    neighbor['type'] = 'uni'
+
             for neighbor in self.neighbors:
                 if time.time() - neighbor['last_recv_from'] > self.expire_time:
                     if neighbor['type'] == 'bi':
                         self.num_neighbors -= 1
-                        # print(self.address, "missed -->", neighbor['address'])
+                        print(self.address, "missed -->", neighbor['address'])
                     neighbor['type'] = None
                     self.log(Log('DUMP', neighbor['address'], self.neighbors))
             self.NeighborsLock.release()
@@ -227,6 +246,7 @@ class Node():
             self.NeighborsLock.acquire()
             # update temp
             neighbor = self.get_neighbor_by_address(new_address)
+            
 
             neighbor['type'] = 'temp'
             self.log(Log('SEARCH', neighbor['address'], self.neighbors))
