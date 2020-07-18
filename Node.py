@@ -22,19 +22,26 @@ class Node():
         self.neighbors = []
         self.num_neighbors = 0
         self.id = id
+
         self.NLock = threading.Lock()
         self.NeighborsLock = threading.Lock()
         self.SearchLock = threading.Lock()
+        self.LogLock = threading.Lock()
+
         self.SearchFlag = False
         self.log_path = log_path
-
+        self.stop = False
+        self.log_bank = [self.address]
         self.make_udp_sock()
         self.init_neighbors()
         self.init_log_file()
 
     def log(self,log):
-        with open(self.file_name, 'a') as file:
-            json.dump(log, file, indent=2)
+        self.log_bank.append(log)
+
+    def final_log(self):
+        with open(self.file_name, 'w') as file:
+            json.dump(self.log_bank, file, indent=2)
 
 
     def init_log_file(self):
@@ -47,10 +54,13 @@ class Node():
                 self.neighbors.append(Neighbor(address, time.time(), time.time()))
 
 
-    def periodic_send(self, stop):
+    def periodic_send(self):
         while(True):
+            if self.stop:
+                exit()
+
             time.sleep(self.comm_time)
-            if not self.active: 
+            if not self.active:
                 time.sleep(1)
                 continue
             
@@ -60,19 +70,23 @@ class Node():
             for i in self.neighbors:
                 if i['type'] == 'bi' or i['type'] == 'temp' or i['type'] == 'tempuni':
                     i['last_sent_to'] = time.time()
+                    self.LogLock.acquire()
+                    self.log(Log('SEND', i['address'], self.neighbors, time.time()))
+                    self.LogLock.release()
                     self.send_HELLO(i['address'])
-                    self.log(Log('SEND', i['address'], self.neighbors))
 
             self.NeighborsLock.release()
 
-            if stop:
-                exit()
 
 
 
-    def rcv(self, stop):
+    def rcv(self):
         while(True):
-            (message, address) = self.socket.recvfrom(self.buffsize)
+            if self.stop:
+                exit()
+            try:
+                (message, address) = self.socket.recvfrom(self.buffsize)
+            except: continue
             hello = json.loads(message.decode())
             address = (hello['sender_address'][0], hello['sender_address'][1])
             
@@ -90,13 +104,17 @@ class Node():
             # if pckt loss
             rand = random.random()
             if rand < 0.05:
-                self.log(Log('PcktLoss', address, self.neighbors))
+                self.LogLock.acquire()
+                log = Log('PcktLoss', address, self.neighbors, time.time())
+                self.log(log)
+                self.LogLock.release()
                 self.NeighborsLock.release()
                 self.NLock.release()
                 continue
-
-
-            self.log(Log('RCV', address, self.neighbors))
+            self.LogLock.acquire()
+            log = Log('RCV', address, self.neighbors, time.time())
+            self.log(log)
+            self.LogLock.release()
             
             
             neighbor = self.get_neighbor_by_address(address)
@@ -111,8 +129,11 @@ class Node():
                 self.rcv_tempuni_handler(neighbor, hello)
             else:
                 self.rcv_none_handler(neighbor, hello)
-            
-            self.log(Log('UPDATE', address, self.neighbors))
+
+            self.LogLock.acquire()
+            log = Log('UPDATE', address, self.neighbors, time.time())
+            self.log(log)
+            self.LogLock.release()
 
             print("UPDATE", self.address)
             for i in self.neighbors:
@@ -123,8 +144,6 @@ class Node():
             self.NLock.release()
 
 
-            if stop:
-                exit()
 
     def need_neighbors(self):
         '''
@@ -196,8 +215,10 @@ class Node():
     
 
 
-    def maintain_neighbors(self, stop):
+    def maintain_neighbors(self):
         while(True):
+            if self.stop:
+                exit()
             time.sleep(1)
 
             self.NLock.acquire()
@@ -213,7 +234,12 @@ class Node():
                         self.num_neighbors -= 1
                         print(self.address, "missed -->", neighbor['address'])
                     neighbor['type'] = None
-                    self.log(Log('DUMP', neighbor['address'], self.neighbors))
+
+                    self.LogLock.acquire()
+                    log = Log('DUMP', neighbor['address'], self.neighbors, time.time())
+                    self.log(log)
+                    self.LogLock.release()
+
             self.NeighborsLock.release()
             self.NLock.release()
 
@@ -221,11 +247,12 @@ class Node():
             self.SearchFlag = False
             self.SearchLock.release()
 
-            if stop:
+
+    def find_neighbors(self):
+        while(True):
+            if self.stop:
                 exit()
 
-    def find_neighbors(self, stop):
-        while(True):
             self.NLock.acquire()
             if not(self.active and self.num_neighbors < self.N):
                 self.NLock.release()
@@ -249,12 +276,13 @@ class Node():
             
 
             neighbor['type'] = 'temp'
-            self.log(Log('SEARCH', neighbor['address'], self.neighbors))
+            self.LogLock.acquire()
+            log = Log('SEARCH', neighbor['address'], self.neighbors, time.time())
+            self.log(log)
+            self.LogLock.release()
             self.NeighborsLock.release()
 
 
-            if stop:
-                exit()
 
 
     def get_my_neighbors(self):
@@ -273,13 +301,17 @@ class Node():
     def send_HELLO(self, address):
         neighbor = self.get_neighbor_by_address(address)
         hello = Hello(self.address, None, self.get_my_neighbors(), neighbor)
-        self.socket.sendto(repr(hello).encode(), address)
+        try:
+            self.socket.sendto(repr(hello).encode(), address)
+        except:
+            pass
 
 
     def make_udp_sock(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.address)
         self.buffsize = 1024
+        self.socket.settimeout(1)
 
 
     def get_random_neighbor(self):
@@ -304,25 +336,26 @@ class Node():
         return False
 
     
-    def run(self, stop):
+    def run(self):
         # find neighbor
-        a = Thread(target=self.find_neighbors, args=(stop, ))
+        a = Thread(target=self.find_neighbors, args=())
         a.start()
 
         # sending every 2 seconds
-        b = Thread(target=self.periodic_send, args=(stop, ))
+        b = Thread(target=self.periodic_send, args=())
         b.start()
 
         # recv from others
-        c = Thread(target=self.rcv, args=(stop, ))
+        c = Thread(target=self.rcv, args=())
         c.start()
 
         # neighbor maintanacne
-        d = Thread(target=self.maintain_neighbors, args=(stop, ))
+        d = Thread(target=self.maintain_neighbors, args=())
         d.start()
 
         a.join()
         b.join()
         c.join()
         d.join()
+        self.final_log()
 

@@ -2,6 +2,7 @@ from utils import *
 from Node import *
 
 Minute = 60
+Duration = 0.1
 
 
 class Manager():
@@ -14,7 +15,6 @@ class Manager():
         self.node_port = base_port
         self.addresses = [(self.ip, self.node_port + i) for i in range(self.num_nodes)]
         self.list_threads = []
-        self.stop_threads = False
         self.log_path = log_path
         self.init_log_dir()
 
@@ -24,19 +24,18 @@ class Manager():
         except:
             pass
 
-    def portal(self, addr, num_neighbour, id, stop):
+    def portal(self, addr, num_neighbour, id):
         try:
             node = Node(addr, num_neighbour, id, self.log_path)
             self.list_nodes.append(node)
-            node.run(stop)
+            node.run()
         except :
             pass
 
     def create_node(self):
         for i in range(self.num_nodes):
             new_thread = Thread(target=self.portal,
-                         args=(self.addresses, self.num_neighbour, i, 
-                            self.stop_threads))
+                         args=(self.addresses, self.num_neighbour, i,))
             new_thread.start()
             print("Node " + str(i + 1) + " is created.")
             self.list_threads.append(new_thread)
@@ -73,11 +72,13 @@ class Manager():
                 print("_______")
 
 
-            if time.time() - start > 5 * Minute:
-                self.stop_threads = True
+            if time.time() - start > Duration * Minute:
                 break
-        
-        
+
+        for node in self.list_nodes:
+            node.active = True
+            node.stop = True
+                    
         for i in self.list_threads:
             i.join()
 
