@@ -2,6 +2,7 @@ from utils import *
 from Neighbor import Neighbor
 from Hello import Hello
 from Log import Log
+from Log import Log_final
 
 class Node():
     def __init__(self, addresses, N, id, log_path, expire_time=8, comm_time=2):
@@ -39,15 +40,33 @@ class Node():
     def log(self,log):
         self.log_bank.append(log)
 
+    def log_neighbors(self):
+        try :
+            new_neighbors = [x for x in self.neighbors if x['type'] == 'bi']
+            return {"address" : new_neighbors[0]['address'], 
+                            "last_sent_to" : new_neighbors[0]['last_sent_to'], 
+                            "last_recv_from" : new_neighbors[0]["last_recv_from"], 
+                                "type" : new_neighbors[0]["type"]}
+        except:
+            return {}
+
     def final_log(self):
         with open(self.file_name, 'w') as file:
             json.dump(self.log_bank, file, indent=2)
 
+        with open(self.file_current_neighbors, 'a') as file:
+            json.dump(Log_final(self.address, self.log_neighbors()), file, indent=2)
+        
 
     def init_log_file(self):
         self.file_name = os.path.join(self.log_path, f'{self.address[1]}.log')
         with open(self.file_name, 'w') as _:
             pass
+
+        self.file_current_neighbors = os.path.join(self.log_path, f'current_neighbors.log')
+        with open(self.file_current_neighbors, 'a') as _:
+            pass
+            
     def init_neighbors(self):
         for address in self.addresses:
             if not self.is_address_mine(address):

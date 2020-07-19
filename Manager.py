@@ -2,7 +2,7 @@ from utils import *
 from Node import *
 
 Minute = 60
-Duration = 0.1
+Duration = 0.15
 
 
 class Manager():
@@ -26,6 +26,10 @@ class Manager():
     def init_log_file(self):
         self.dest_file = os.path.join(self.log_path, f'{self.address_dest}.log')
         with open(self.dest_file, 'w') as _:
+            pass
+
+        self.file_current_neighbors = os.path.join(self.log_path, f'current_neighbors.log')
+        with open(self.file_current_neighbors, 'w') as _:
             pass
 
     def init_log_dir(self):
