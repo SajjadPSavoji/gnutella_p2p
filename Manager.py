@@ -2,7 +2,7 @@ from utils import *
 from Node import *
 
 Minute = 60
-Duration = 0.15
+Duration = 0.3
 
 
 class Manager():
@@ -19,6 +19,7 @@ class Manager():
         self.log_path = log_path
         self.address_dest = address_dest
         self.filename = 'history_calculator.py'
+        self.access_file = 'access_calculator.py'
 
         self.init_log_dir()
         self.init_log_file()
@@ -30,6 +31,10 @@ class Manager():
 
         self.file_current_neighbors = os.path.join(self.log_path, f'current_neighbors.log')
         with open(self.file_current_neighbors, 'w') as _:
+            pass
+
+        self.file_access = os.path.join(self.log_path, f'access.log')
+        with open(self.file_access, 'w') as _:
             pass
 
     def init_log_dir(self):
@@ -100,7 +105,8 @@ class Manager():
         for i in range(self.num_nodes):
             num = self.node_port + i
             os.system(f'python3 {self.filename} {self.node_port} {self.num_nodes} {num} {self.dest_file}')
-        print('History log file created.')
+            os.system(f'python3 {self.access_file} {self.node_port} {self.num_nodes} {num} {Duration} {self.file_access}')
+        print('History and Access logs file created.')
 
 
     
