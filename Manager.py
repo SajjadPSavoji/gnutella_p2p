@@ -6,7 +6,8 @@ Duration = 0.1
 
 
 class Manager():
-    def __init__(self, num_nodes, num_neighbour, max_time, base_port, log_path = './logs/'):
+    def __init__(self, num_nodes, num_neighbour, max_time, base_port,
+                             log_path = './logs/', address_dest='history'):
         self.num_nodes = num_nodes
         self.num_neighbour = num_neighbour
         self.list_nodes = []
@@ -16,7 +17,16 @@ class Manager():
         self.addresses = [(self.ip, self.node_port + i) for i in range(self.num_nodes)]
         self.list_threads = []
         self.log_path = log_path
+        self.address_dest = address_dest
+        self.filename = 'history_calculator.py'
+
         self.init_log_dir()
+        self.init_log_file()
+
+    def init_log_file(self):
+        self.dest_file = os.path.join(self.log_path, f'{self.address_dest}.log')
+        with open(self.dest_file, 'w') as _:
+            pass
 
     def init_log_dir(self):
         try:
@@ -81,8 +91,13 @@ class Manager():
                     
         for i in self.list_threads:
             i.join()
+        print('All threads are joined.')
 
-        print('All threads are joined and the program is finished.')
+        for i in range(self.num_nodes):
+            num = self.node_port + i
+            os.system(f'python3 {self.filename} {self.node_port} {self.num_nodes} {num} {self.dest_file}')
+        print('History log file created.')
+
 
     
     def run(self):

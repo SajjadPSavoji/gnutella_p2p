@@ -1,4 +1,5 @@
 from utils import *
+import sys
 
 class History_Log(dict):
     def __init__(self,address,  neighbor_addresses, rcv_pack, send_pack):
@@ -8,7 +9,7 @@ class History_Log(dict):
 
 class history_calculator():
 
-    def __init__(self, base_port, num_nodes, address, log_path = './logs/', address_dest='history'):
+    def __init__(self, base_port, num_nodes, address, address_dest='./logs/history.log', log_path = './logs/'):
 
         self.base_port = base_port
         self.num_nodes = num_nodes
@@ -26,8 +27,8 @@ class history_calculator():
             self.data = json.load(file)
 
     def init_log_file(self):
-        self.dest_file = os.path.join(self.log_path, f'{self.address_dest}.log')
-        with open(self.dest_file, 'w') as _:
+        self.dest_file = self.address_dest
+        with open(self.dest_file, 'a') as _:
             pass
 
     def log(self,log):
@@ -39,6 +40,8 @@ class history_calculator():
         num_sent_packets = [0 for i in range(self.num_nodes)]
         num_rcv_packets = [0 for i in range(self.num_nodes)]
         for log in self.data:
+            if log == ['', self.address[1]]:
+                continue
 
             if log['procedure'] == "SEND":
                 num_sent_packets[log['address'][1] - self.base_port] += 1
@@ -48,9 +51,7 @@ class history_calculator():
         self.log(History_Log(self.address, self.addresses, num_rcv_packets, num_sent_packets))
         
         
-
-hc = history_calculator(8000, 3,('',8000))
-print(hc.file_name)
+hc = history_calculator(int(sys.argv[1]), int(sys.argv[2]),('',int(sys.argv[3])), sys.argv[4])
 hc.all_time_neighbors()
 
 
