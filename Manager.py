@@ -2,7 +2,7 @@ from utils import *
 from Node import *
 
 Minute = 60
-Duration = 0.3
+Duration = 2
 
 
 class Manager():

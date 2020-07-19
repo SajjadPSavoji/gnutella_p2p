@@ -154,10 +154,10 @@ class Node():
             self.log(log)
             self.LogLock.release()
 
-            print("UPDATE", self.address)
-            for i in self.neighbors:
-                print(i['address'], i['type'])
-            print(" ")
+            # print("UPDATE", self.address)
+            # for i in self.neighbors:
+            #     print(i['address'], i['type'])
+            # print(" ")
 
             self.NeighborsLock.release()
             self.NLock.release()
