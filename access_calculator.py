@@ -10,7 +10,7 @@ class Access_Log(dict):
 
 class access_calculator():
 
-    def __init__(self, base_port, num_nodes, address, duration, address_dest='./logs/access.log', log_path = './logs/'):
+    def __init__(self, base_port, num_nodes, address, duration, address_dest='./logs_final/access.log', log_path = './logs/'):
 
         self.base_port = base_port
         self.num_nodes = num_nodes

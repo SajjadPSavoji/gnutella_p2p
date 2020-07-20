@@ -9,7 +9,7 @@ class History_Log(dict):
 
 class history_calculator():
 
-    def __init__(self, base_port, num_nodes, address, address_dest='./logs/history.log', log_path = './logs/'):
+    def __init__(self, base_port, num_nodes, address, address_dest='./logs_final/history.log', log_path = './logs/'):
 
         self.base_port = base_port
         self.num_nodes = num_nodes

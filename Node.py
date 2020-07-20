@@ -5,7 +5,7 @@ from Log import Log
 from Log import Log_final
 
 class Node():
-    def __init__(self, addresses, N, id, log_path, expire_time=8, comm_time=2):
+    def __init__(self, addresses, N, id, log_path, final_log_path, expire_time=8, comm_time=2):
         '''
         address (ip, port)
         addresses are the initial addresses that client should hit: list of addresses
@@ -31,6 +31,7 @@ class Node():
 
         self.SearchFlag = False
         self.log_path = log_path
+        self.final_log_path = final_log_path
         self.stop = False
         self.log_bank = [self.address]
         self.make_udp_sock()
@@ -63,7 +64,8 @@ class Node():
         with open(self.file_name, 'w') as _:
             pass
 
-        self.file_current_neighbors = os.path.join(self.log_path, f'current_neighbors.log')
+
+        self.file_current_neighbors = os.path.join(self.final_log_path, f'current_neighbors.log')
         with open(self.file_current_neighbors, 'a') as _:
             pass
             
