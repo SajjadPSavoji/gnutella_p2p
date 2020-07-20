@@ -114,7 +114,6 @@ class Manager():
             os.system(f'python3 {self.access_file} {self.node_port} {self.num_nodes} {num} {Duration} {self.file_access}')
         print('History and Access logs file created.')
 
-
     
     def run(self):
         self.create_node()
