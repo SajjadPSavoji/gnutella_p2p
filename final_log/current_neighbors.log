@@ -1,0 +1,53 @@
+{
+  "address_self": [
+    "",
+    8000
+  ],
+  "neighbors": {
+    "address": [
+      "",
+      8001
+    ],
+    "last_sent_to": 1595266911.7990892,
+    "last_recv_from": 1595266910.3788955,
+    "type": "bi"
+  }
+}{
+  "address_self": [
+    "",
+    8005
+  ],
+  "neighbors": {}
+}{
+  "address_self": [
+    "",
+    8004
+  ],
+  "neighbors": {}
+}{
+  "address_self": [
+    "",
+    8002
+  ],
+  "neighbors": {}
+}{
+  "address_self": [
+    "",
+    8001
+  ],
+  "neighbors": {
+    "address": [
+      "",
+      8000
+    ],
+    "last_sent_to": 1595266912.4212835,
+    "last_recv_from": 1595266911.8064888,
+    "type": "bi"
+  }
+}{
+  "address_self": [
+    "",
+    8003
+  ],
+  "neighbors": {}
+}
